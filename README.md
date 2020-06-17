@@ -1,4 +1,4 @@
-# RNA-seq-tracking
+# OMICS progress report
 
 ## About
 This page reports TOPMed Omics data received by the IRC

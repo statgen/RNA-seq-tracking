@@ -5,41 +5,30 @@ require_once("../lib/cli.inc.php");
 $field = "";
 
 print "Updating ... \n";
-$sql = <<<SQL
-SELECT * FROM rna_seq.qc_attributes_mapper where field_name != "sample_id" order by id ASC;
-SQL;
-
-$conn = db_conn();
-$result = $conn->query($sql);
-while($row = $result->fetch_assoc()) {
-  $field = $row["field_name"];
-  $calSql= <<<SQL
-SELECT {$field} from `qc_metrics` ORDER BY {$field} ASC;
-SQL;
-  
-  $dataset = $conn->query($calSql);
+foreach(QcAttributesMapper::where("field_name","!=","sample_id")->get() as $mapper) {
+  $field = $mapper->field_name;
   $array = [];
-  while($ds = $dataset->fetch_assoc()) {
-    $array[] = $ds[$field]; 	
+  foreach(QcMetrics::select($field)->orderBy($field)->get() as $metrics){
+    if(!empty($metrics->$field)) {
+      $array[]=$metrics->$field;
+    }
   }
-  $median = get_median($array);
-  $pct25 = get_first_quartile($array);
-  $pct75 = get_third_quartile($array);
-  $sd = get_sd ($array, $bSample = false);
-  $mean = array_sum($array) / count($array);
-  $min = min($array);
-  $max = max($array);
-  
-  $updateSql = <<<SQL
-UPDATE `rna_seq`.`qc_attributes_mapper` SET `mean`=$mean, `sd`=$sd, `min`=$min, `25pct`=$pct25, `50pct`=$median, `75pct`=$pct75, `max`=$max WHERE `field_name` = "{$field}";
-SQL;
-  if($conn->query($updateSql)) {
+  if(count($array)) {
+    $mapper->median = get_median($array);
+    $mapper->pct25 = get_first_quartile($array);
+    $mapper->pct75 = get_third_quartile($array);
+    $mapper->sd = get_sd ($array, $bSample = false);
+    $mapper->mean = array_sum($array) / count($array);
+    $mapper->min = min($array);
+    $mapper->max = max($array);
+  }
+
+  if($mapper->save()) {
     echo "Finished updating the " .$field. " \n";
   }
-}  
+}
 
-$conn->close();
-  
+
 function get_median ($dataset) {
   return (count($dataset) % 2) ? $dataset[(count($dataset) - 1) / 2] : ($dataset[count($dataset) / 2 + 1] + $dataset[count($dataset) / 2]) / 2;
 }

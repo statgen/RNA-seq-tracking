@@ -18,31 +18,27 @@ if(count($argv)<2 || in_array($argv[1], array('--help', '-help', '-h', '-?'))) {
 }
 
 if(filter_var($email, FILTER_VALIDATE_EMAIL)) {
-  addWhitelist(json_encode($email));
+  addWhitelist($email);
 } else {
   print "Invalid email, aborted ...\n";
-  exit; 
+  exit;
 }
-  
+
+/*
+ * @param $email user email
+ *
+ */
 function addWhitelist($email) {
-  $select = <<<SQL
-SELECT email from `nhlbi`.`user_whitelist` 
-  WHERE `email` = {$email};
-SQL;
-  $query = <<<SQL
-INSERT INTO `nhlbi`.`user_whitelist` (`email`) VALUES ({$email});
-SQL;
-  $conn = db_conn_nhlbi();
-  $result=mysqli_query($conn, $select);
-  if(mysqli_num_rows($result) > 0) {
+  if(userWhitelist::where("email", $email)->count()) {
     echo $email . " has already been in the white list, aborted ...\n";
     exit;
   }
-  if (mysqli_query($conn, $query)) {
+  $user = new userWhitelist;
+  $user->email = $email;
+  if ($user->save()) {
     echo $email ." has been added successfully\n";
   } else {
-    echo "Error: " . mysqli_error($conn) . "\n";
+    echo "Error occurred, please try again\n";
   }
-  $conn->close();
 }
 ?>

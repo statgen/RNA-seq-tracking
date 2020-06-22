@@ -2,15 +2,6 @@
 
 <?php
 
-/*
-* option -opt
-* 1. scan
-* 2. load
-* 3. update
-*
-* option -f => filename
-*/
-
 require_once("../lib/cli.inc.php");
 
 if(!checkAdminPermission()) {
@@ -19,15 +10,15 @@ if(!checkAdminPermission()) {
 
 //define source file path
 define('SRC_FILE_DIR', getcwd() . '/src/');
-$file_list = get_pending_files(); 
+$file_list = get_pending_files();
 
-if(!count($file_list)) {
+if(!$file_list->count()) {
   echo "No pending file has been found in the file_queue table! \n";
   exit;
 } else {
   echo "Below are the file(s) that will be processed: \n";
   foreach ($file_list as $file) {
-    echo $file["queueid"] . ". " .$file["filename"] . "\n";
+    echo $file->id . ". " . $file->filename . "\n";
   }
   echo "\nType 'yes' => continue, 'no' => exit; \n";
 }
@@ -41,28 +32,27 @@ if(trim($line) != 'yes'){
 echo "\nContinuing...\n";
 
 foreach ($file_list as $file) {
-  $set_processed = "";
   $query = "";
-  if (file_exists(SRC_FILE_DIR . $file["filename"])) {
-    if(strpos(strtolower($file["filename"]), "init")) { //process samples data
+  if (file_exists(SRC_FILE_DIR . $file->filename)) {
+    if(strpos(strtolower($file->filename), "init")) { //process samples data
       $target_table = "samples";
-    } elseif (strpos(strtolower($file["filename"]), "metrics")) { // process qc metrics data
+    } elseif (strpos(strtolower($file->filename), "metrics")) { // process qc metrics data
       $target_table = "qc_metrics";
     } else {
       echo "Error: file type is undefined! \n";
       exit;
     }
-    $query = process_data_in_tsv(SRC_FILE_DIR.$file["filename"], $target_table, $file["queueid"]);
-    $set_processed = <<<SQL
-UPDATE `file_queue` SET `processed_at` = now() WHERE `id` = {$file["queueid"]};
-SQL;
+    $query = process_data_in_tsv(SRC_FILE_DIR.$file->filename, $target_table, $file->id);
     $conn = db_conn();
-    if (mysqli_query($conn, $query) && mysqli_query($conn, $set_processed)) {
+    if (mysqli_query($conn, $query) && set_processed($file->id)) {
       echo "New qc metrics updated successfully for ". $file["filename"] ."\n";
     } else {
       echo "Error: " . mysqli_error($conn) . "\n ";
     }
     $conn->close();
+  } else {
+    echo "Error, ".$file->filename." was not found in ".SRC_FILE_DIR."!\n";
+    exit;
   }
 }
 
@@ -86,11 +76,8 @@ function get_db_mapping_array($type) {
       "Tissue Type" => "tissue_type"
     ];
   } elseif ($type==="qc_metrics") {
-    $conn = db_conn();
-    $query = "SELECT full_attribute, field_name from qc_attributes_mapper";
-    $result = $conn->query($query);
-    while($row = $result->fetch_assoc()) {
-      $array[$row["full_attribute"]] = $row["field_name"];
+    foreach(QcAttributesMapper::all() as $mapper) {
+      $array[$mapper->full_attribute] = $mapper->field_name;
     }
 
   } else {
@@ -164,23 +151,23 @@ SQL;
 
 /*
  * get pending files from the file_queue table
- * @return array of files list
+ * @return ORM object of files list
  *
  */
 function get_pending_files() {
-  $conn = db_conn();
-  $query = <<<SQL
-SELECT id, filename FROM `file_queue` where processed_at is NULL ORDER BY `id` ASC;
-SQL;
-  $result = $conn->query($query);
-  $files = [];
-  while($row = $result->fetch_assoc()) {
-    $files[] = [
-      "queueid" => $row["id"],
-      "filename" => $row["filename"]
-    ];
-  }
+  $files = FileQueue::whereNull("processed_at")->get();
   return $files;
 }
 
+/*
+ * set processed_at to now()
+ * @param $id FileQueue id
+ *
+ */
+function set_processed($id) {
+  $file = FileQueue::find($id);
+  $file->processed_at = date("Y-m-d H:i:s");
+  $file->save();
+  return true;
+}
 ?>

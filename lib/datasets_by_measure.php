@@ -1,5 +1,7 @@
 <?php
-require_once($_SERVER['DOCUMENT_ROOT'] . '/omics/lib/database.php');
+require_once("/var/www/vendor/autoload.php");
+require_once("/var/www/config.php");
+require_once("/var/www/report/lib/database.php");
 
 if(!$_GET['field'] || !$_GET['label'] || !$_GET['study']) {
   //bad request
@@ -8,42 +10,35 @@ if(!$_GET['field'] || !$_GET['label'] || !$_GET['study']) {
 }
 
 $label = $_GET['label'];
+$field = $_GET["field"];
+$study = $_GET["study"];
+$ds=[];
+$compare=[];
 
 //query default dataset including all studies
 if($_GET['study'] ==="all") {
-  $sql = <<<SQL
-SELECT {$_GET['field']} as val FROM rna_seq.qc_metrics;
-SQL;
+  $query = QcMetrics::whereNotNull($field)->select($field);
 } else {
-  $sql = <<<SQL
-SELECT {$_GET['field']} as val FROM rna_seq.qc_metrics join samples
-  on qc_metrics.sample_id = samples.id
-  WHERE study_id = "{$_GET['study']}";
-SQL;
+  $query = QcMetrics::join("samples","samples.id","=","sample_id")
+    ->select($field)
+    ->whereNotNull($field)
+    ->where("study_id",$study);
 }
 
-$queryOne = new RawQuery('rnaseq', $sql);
-if ($results = $queryOne->get()) {
-  $ds=[];
-  foreach($results as $result) {
-    $ds[] = $result->val;
-  }
+$ds=[];
+foreach($query->get() as $result) {
+  $ds[] = $result->$field;
 }
 
 //query dataset two if set
 if(isset($_GET['compare'])) {
-  $sqlTwo = <<<SQL
-SELECT {$_GET['field']} as val FROM rna_seq.qc_metrics join samples
-  on qc_metrics.sample_id = samples.id 
-  WHERE study_id = "{$_GET['compare']}";
-SQL;
+  $sqlTwo = QcMetrics::join("samples","samples.id","=","sample_id")
+    ->select($field)
+    ->whereNotNull($field)
+    ->where("study_id", $_GET['compare']);
 
-  $queryTwo = new RawQuery('rnaseq', $sqlTwo);
-  if ($rows = $queryTwo->get()) {
-    $compare=[];
-    foreach($rows as $row) {
-      $compare[] = $row->val;
-    }
+  foreach($sqlTwo->get() as $row) {
+    $compare[] = $row->$field;
   }
 }
 

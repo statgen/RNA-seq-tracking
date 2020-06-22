@@ -36,6 +36,13 @@ CREATE TABLE `qc_attributes_mapper` (
   `field_name` VARCHAR(64) NOT NULL,
   `full_attribute` VARCHAR(255) NOT NULL,
   `weight` INT(1) NOT NULL DEFAULT 1,
+  `mean` FLOAT NULL DEFAULT NULL,
+  `sd` FLOAT NULL DEFAULT NULL,
+  `min` FLOAT NULL DEFAULT NULL,
+  `pct25` FLOAT NULL DEFAULT NULL,
+  `median` FLOAT NULL DEFAULT NULL,
+  `pct75` FLOAT NULL DEFAULT NULL,
+  `max` FLOAT NULL DEFAULT NULL,
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `extract_key_UNIQUE` (`field_name` ASC),
@@ -259,5 +266,3 @@ CREATE TABLE `centers` (
   `datatype` varchar(64) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-

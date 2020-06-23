@@ -1,6 +1,7 @@
 <?php
-
-require_once($_SERVER['DOCUMENT_ROOT'] . '/omics/lib/database.php');
+require_once("/var/www/vendor/autoload.php");
+require_once("/var/www/config.php");
+require_once("/var/www/report/lib/database.php");
 
 $total = 0;
 $categories = [];
@@ -8,12 +9,10 @@ $ds=[];
 $topic = strtolower(($_GET["topic"])?$_GET["topic"]:"rnaseq"); 
 
 if($topic=="rna-seq") {
-  $sql = <<<SQL
-SELECT study_id, count(1) as num FROM rna_seq.samples group by study_id ORDER BY study_id ASC;
-SQL;
-
-  $query = new RawQuery('rnaseq', $sql);
-  $results = $query->get();
+  $results = Sample::selectRaw("study_id, count(1) as num")
+    ->groupBy("study_id")
+    ->orderBy("study_id")
+    ->get();
 
   foreach($results as $result) {
     $categories[] = $result->study_id;

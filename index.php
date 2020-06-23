@@ -3,7 +3,8 @@
 session_start(); //session start
 
 require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
-require_once($_SERVER['DOCUMENT_ROOT'] . '/omics/lib/database.php');
+require_once($_SERVER['DOCUMENT_ROOT'] . '/vendor/autoload.php');
+require_once($_SERVER['DOCUMENT_ROOT'] . '/report/lib/database.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/report/lib/libraries/Google/autoload.php');
 
 //handle logout request

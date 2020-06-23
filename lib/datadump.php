@@ -1,19 +1,18 @@
 <?php
-
-session_start();
-require_once($_SERVER['DOCUMENT_ROOT'] . '/omics/lib/database.php');
-
+if(!isset($_SESSION)){
+  session_start();
+}
 if(!$_SESSION['access_token'] OR !$_SESSION['omics_user']) {
   //Unauthorized
   http_response_code(401);
   exit;
 }
 
+require_once("/var/www/vendor/autoload.php");
+require_once("/var/www/config.php");
+require_once("/var/www/report/lib/database.php");
+
 ini_set('memory_limit', '2G');
-
-//Check if there is a valid session
-//if($_SESSION['access_token'] && $_SESSION['topmed_user']) {
-
 ini_set("auto_detect_line_endings", true);
 
 //build header array
@@ -22,26 +21,14 @@ $header = [
   "study_id" => "Study",
   "dataset_id" => "Dataset"
 ];
- 
-$sql = <<<SQL
-SELECT field_name, full_attribute from qc_attributes_mapper where weight = 1 order by id ASC;
-SQL;
 
-$query = new RawQuery('rnaseq', $sql);
-if ($results = $query->get()) {
-  foreach($results as $result) {
-    $header[$result->field_name] = $result->full_attribute;	
-  }
+foreach(QcAttributesMapper::select("field_name","full_attribute")->where("weight","1")->get() as $mapper) {
+  $header[$mapper->field_name] = $mapper->full_attribute;	
 }
 
-$qcSql = <<<SQL
-SELECT qc_metrics.*, samples.study_id, samples.dataset_id 
-  FROM samples join qc_metrics 
-  on samples.id = qc_metrics.sample_id;
-SQL;
-
-$qcQuery = new RawQuery('rnaseq', $qcSql);
-$metrics = $qcQuery->get(); 
+$metrics = QcMetrics::join("samples","samples.id","=","sample_id")
+  ->select("qc_metrics.*", "study_id", "dataset_id")
+  ->get();
 
 $today = date("Y-m-d-His");
 
@@ -58,12 +45,9 @@ fputcsv($output, array_values($header), chr(9));
 foreach($metrics as $row) {
  $data = [];
  foreach($header as $key=>$value) {
-   $data[] = $row->$key;
+   $data[] = ($row->$key===null)?"NA":$row->$key;
  }
  fputcsv($output, $data, chr(9)); 
 }
 
 exit;
-/*} else {
-  http_response_code(403); //FORBIDDEN
-}*/

@@ -16,30 +16,23 @@ $ds=[];
 $compare=[];
 
 //query default dataset including all studies
-if($_GET['study'] ==="all") {
-  $query = QcMetrics::whereNotNull($field)->select($field);
+if($study ==="all") {
+  $ds = QcMetrics::whereNotNull($field)->pluck($field)->toArray();
 } else {
-  $query = QcMetrics::join("samples","samples.id","=","sample_id")
-    ->select($field)
+  $ds = QcMetrics::join("samples","samples.id","=","sample_id")
     ->whereNotNull($field)
-    ->where("study_id",$study);
-}
-
-$ds=[];
-foreach($query->get() as $result) {
-  $ds[] = $result->$field;
+    ->where("study_id",$study)
+    ->pluck($field)
+    ->toArray();
 }
 
 //query dataset two if set
 if(isset($_GET['compare'])) {
-  $sqlTwo = QcMetrics::join("samples","samples.id","=","sample_id")
-    ->select($field)
+  $compare = QcMetrics::join("samples","samples.id","=","sample_id")
     ->whereNotNull($field)
-    ->where("study_id", $_GET['compare']);
-
-  foreach($sqlTwo->get() as $row) {
-    $compare[] = $row->$field;
-  }
+    ->where("study_id", $_GET['compare'])
+    ->pluck($field)
+    ->toArray();
 }
 
 print json_encode(["label"=>$label, "data" => $ds, "compare" => $compare]);

@@ -88,10 +88,10 @@ function get_db_mapping_array($type) {
 
 /*
  * process data in tsv file and generate a set of insert statements
- * @param $file - path + file name
+ * @param $file path + file name
  * @param $table table name , currently "samples" and "qc_metrics"
- * @param $qid file_queue_i
- * @return INSERT query statement
+ * @param $qid file_queue_id
+ * @return A set of insert query statement
  */
 function process_data_in_tsv($file, $table, $qid=null) {
   if(!in_array($table, ["samples", "qc_metrics"])) {

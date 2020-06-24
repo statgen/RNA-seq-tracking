@@ -4,15 +4,13 @@
 require_once("../lib/cli.inc.php");
 $field = "";
 
-print "Updating ... \n";
+print "Starting the update ... \n";
 foreach(QcAttributesMapper::where("field_name","!=","sample_id")->get() as $mapper) {
   $field = $mapper->field_name;
-  $array = [];
-  foreach(QcMetrics::select($field)->orderBy($field)->get() as $metrics){
-    if(!empty($metrics->$field)) {
-      $array[]=$metrics->$field;
-    }
-  }
+  $array = QcMetrics::whereNotNull($field)
+    ->orderBy($field)
+    ->pluck($field)
+    ->toArray();
   if(count($array)) {
     $mapper->median = get_median($array);
     $mapper->pct25 = get_first_quartile($array);
@@ -23,8 +21,11 @@ foreach(QcAttributesMapper::where("field_name","!=","sample_id")->get() as $mapp
     $mapper->max = max($array);
   }
 
-  if($mapper->save()) {
+  try {
+    $mapper->save();
     echo "Finished updating the " .$field. " \n";
+  } catch (exception $e) {
+    echo "\033[31mError occurred when updating the ".$field. "\033[0m \n";
   }
 }
 

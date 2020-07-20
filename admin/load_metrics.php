@@ -70,10 +70,11 @@ function get_db_mapping_array($type) {
       "Study" => "study_id",
       "Dataset" => "dataset_id",
       "TORID" => "torid",
-      "Investigator ID" => "investigator_id",
+      "Investigator_ID" => "investigator_id",
       "Family ID" => "family_id",
       "Good Faith Approved" => "good_faith_approved",
-      "Tissue Type" => "tissue_type"
+      "Tissue Type" => "tissue_type",
+      "arrival_date" => "arrival_date"
     ];
   } elseif ($type==="qc_metrics") {
     foreach(QcAttributesMapper::all() as $mapper) {
@@ -115,7 +116,8 @@ function process_data_in_tsv($file, $table, $qid=null) {
           $empty_last_column = true;
         }
         for ($j=0; $j<count($fields); $j++) {
-          if ($fields[$j] && $fields_db_mapping[$fields[$j]]) {
+          $fields[$j] = trim($fields[$j]);
+          if ($fields[$j] && array_key_exists($fields[$j], $fields_db_mapping)) {
             $fields[$j] = $fields_db_mapping[$fields[$j]];
           } else {
             echo "Error: empty header column found in tsv file, process terminated!\n";

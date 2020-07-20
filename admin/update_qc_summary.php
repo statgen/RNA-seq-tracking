@@ -5,7 +5,7 @@ require_once("../lib/cli.inc.php");
 $field = "";
 
 print "Starting the update ... \n";
-foreach(QcAttributesMapper::where("field_name","!=","sample_id")->get() as $mapper) {
+foreach(QcAttributesMapper::whereNotIn("field_name",["sample_id", "note"])->get() as $mapper) {
   $field = $mapper->field_name;
   $array = QcMetrics::whereNotNull($field)
     ->orderBy($field)

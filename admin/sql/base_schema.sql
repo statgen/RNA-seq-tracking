@@ -14,7 +14,6 @@ CREATE TABLE `file_queue` (
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
-
 DROP TABLE IF EXISTS `samples`;
 CREATE TABLE `samples` (
   `id` VARCHAR(64) NOT NULL,
@@ -24,11 +23,10 @@ CREATE TABLE `samples` (
   `investigator_id` VARCHAR(128) NULL DEFAULT NULL,  
   `family_id` VARCHAR(128) NULL DEFAULT NULL,  
   `good_faith_approved` VARCHAR(8) NULL DEFAULT NULL,  
-  `tissue_type` VARCHAR(128) NULL DEFAULT NULL,  
+  `tissue_type` VARCHAR(128) NULL DEFAULT NULL,
+  `arrival_date` DATETIME NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
 
 DROP TABLE IF EXISTS `qc_attributes_mapper`;
 CREATE TABLE `qc_attributes_mapper` (
@@ -227,42 +225,42 @@ ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
 
-DROP TABLE IF EXISTS `datasets`;
-CREATE TABLE `datasets` (
-  `id` VARCHAR(255) NOT NULL,
-  `desc` VARCHAR(255) NULL,
-  `center_id` INT(3) NOT NULL,
-  `arrive_date` DATETIME NOT NULL,
-  `init_location` VARCHAR(255) NULL,
-  `backup_location` VARCHAR(255) NULL,
-  `globus_location` VARCHAR(255) NULL,
-  `release_status` VARCHAR(45) NULL,
-  `exchange_area_status` VARCHAR(45) NULL,
-  `study_release_date` DATETIME NULL,
-  `study_release_method` VARCHAR(45) NULL,
-  `dbgap_okey` INT(1) NULL,
-  `dbgap_submit_date` DATETIME NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 DROP TABLE IF EXISTS `studies`;
 CREATE TABLE `studies` (
-  `id` VARCHAR(128) NOT NULL,
-  `center_id` INT(3) NOT NULL,
-  `pi` VARCHAR(64) NULL,
-  `phs_number` VARCHAR(64) NULL,
-  `downloader` VARCHAR(255) NULL,
-  `alt_downloader` VARCHAR(255) NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-DROP TABLE IF EXISTS `centers`;
-CREATE TABLE `centers` (
   `id` int(3) NOT NULL AUTO_INCREMENT,
-  `name` varchar(16) NOT NULL,
-  `desc` varchar(96) DEFAULT NULL,
-  `designdesc` text,
-  `datatype` varchar(64) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  `study` VARCHAR(64) NOT NULL,
+  `pi` VARCHAR(64) NULL,
+  `datatype` VARCHAR(32) NOT NULL,
+  `center` VARCHAR(64) NOT NULL,
+  `samplereceived` int(8) NULL,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  INDEX `idx_study_datatype` (`study` ASC, `datatype` ASC)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO `studies` (`id`, `study`, `pi`, `datatype`, `center`, `samplereceived`) VALUES 
+('1', 'GALAII', 'Burchard', 'RNA-seq', 'Broad', '2491'),
+('2', 'SAGE', 'Burchard', 'RNA-seq', 'Broad', '950'),
+('3', 'WHI', 'Kooperberg', 'RNA-seq', 'Broad', '1367'),
+('4', 'Framingham', 'Levy', 'RNA-seq', 'NWGC', '1522'),
+('5', 'Spiromics', 'Meyers', 'RNA-seq', 'NWGC', '3980'),
+('6', 'Framingham', 'Ramachandran', 'RNA-seq', 'NWGC', '1191'),
+('7', 'MESA pilot', 'Rotter', 'RNA-seq', 'Broad', '1500'),
+('8', 'MESA pilot', 'Rotter', 'RNA-seq', 'NWGC', '1422'),
+('9', 'PCGC', 'Seidman', 'RNA-seq', 'Broad', '95'),
+('10', 'LTRC', 'Silverman', 'RNA-seq', 'NWGC', '2354'),
+('11', 'TOP-CHeF', 'M.Taylor', 'RNA-seq', 'Broad', '654'),
+('12', 'Sentinel', 'UW', 'RNA-seq', 'NWGC', '96'),
+('13', 'PVDOMICS', 'Erzurum', 'Methylation', 'NWGC', '958'),
+('14', 'CARDIA', 'Fornage', 'Methylation', 'USC', '1920'),
+('15', 'WHI', 'Kooperberg', 'Methylation', 'USC', '1334'),
+('16', 'Framingham', 'Ramachandran', 'Methylation', 'USC', '1814'),
+('17', 'MESA pilot', 'Rotter', 'Methylation', 'USC', '2406'),
+('18', 'COPDGene', 'Silverman', 'Methylation', 'NWGC', '11843'),
+('19', 'LTRC', 'Silverman', 'Methylation', 'NWGC', '3041'),
+('20', 'CAMP', 'Weiss', 'Methylation', 'USC', '1616'),
+('21', 'CRA', 'Weiss', 'Methylation', 'USC', '1238'),
+('22', 'WHI', 'Kooperberg', 'Metabolomics', 'Broad', '1400'),
+('23', 'Framingham', 'Ramachandran', 'Metabolomics', 'Broad', '3025'),
+('24', 'CAMP', 'Weiss', 'Metabolomics', 'Broad', '962'),
+('25', 'CRA', 'Weiss', 'Metabolomics', 'Broad', '2038');

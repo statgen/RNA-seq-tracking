@@ -3,16 +3,14 @@ require_once("/var/www/vendor/autoload.php");
 require_once("/var/www/config.php");
 require_once("/var/www/report/lib/database.php");
 
-$results = Sample::selectRaw("UNIX_TIMESTAMP(arrival_date) as d, count(id) as num")
-  ->groupBy("d")
-  ->orderBy("d", "ASC")
+$results = Study::selectRaw("center, datatype, SUM(samplereceived) as num")
+  ->groupBy("datatype")
+  ->groupBy("center")
   ->get();
 
 $ds=[];
-$sum=0;
 foreach($results as $result) {
-  $sum += $result->num;
-  $ds[] = [$result->d*1000, $sum];	
+  $ds[] = $result;
 }
 
 echo json_encode($ds);

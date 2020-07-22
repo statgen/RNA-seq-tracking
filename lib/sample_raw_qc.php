@@ -20,12 +20,12 @@ $size = isset($_POST['size'])?$_POST['size']:100;
 $offset = ($page-1)*$size;
 
 //customize what qc measures to display in qc_attributes_mapper table
-$attributes=[2,3,6,13,14,18,23,24,59,61];
+$attributes=[2,4,12,18,19,20,24,66,70];
 $columns = QcAttributesMapper::whereIn("id",$attributes)
   ->orderBy("field_name")
   ->pluck("field_name")
   ->toArray();
-$columns[]="samples.id";
+$columns[]="samples.torid";
 $columns[]="samples.study_id";
 
 //define base qc metrics query
@@ -33,7 +33,7 @@ $query = QcMetrics::join("samples","samples.id","=","sample_id")
   ->select($columns)
   ->where(function ($query) {
     //apply ajax study param if selected
-    if($_POST['study']!="all" AND $_POST['study']) {
+    if($_POST['study']!="All studies" AND $_POST['study']) {
       $query->where("study_id", $_POST['study']);
     }
   })->where(function ($query) {

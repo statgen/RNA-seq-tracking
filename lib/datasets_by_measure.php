@@ -16,7 +16,7 @@ $ds=[];
 $compare=[];
 
 //query default dataset including all studies
-if($study ==="all") {
+if($study ==="All studies") {
   $ds = QcMetrics::whereNotNull($field)->pluck($field)->toArray();
 } else {
   $ds = QcMetrics::join("samples","samples.id","=","sample_id")

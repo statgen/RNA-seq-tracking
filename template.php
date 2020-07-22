@@ -1,7 +1,7 @@
 <?php
 if(!isset($_SESSION)){ 
   session_start();
-} 
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -86,16 +86,6 @@ if(!isset($_SESSION)){
     </div>
 
     <div class="container bs-docs-container">
-      <p class="summary">
-	<strong>RNA-seq</strong>: <span id="RNA-seq_samples"></span> samples from <span id="RNA-seq_study"></span> studies<br/>
-	<strong>Methylation</strong>: <span id="Methylation_samples"></span> samples from <span id="Methylation_study"></span> studies<br/>
-	<strong>Metabolomics</strong>: <span id="Metabolomics_samples"></span> samples from <span id="Metabolomics_study"></span> studies</p>
-      <p class="summary">
-	<strong>Technical:</strong><br/>
-	Stranded, poly-A-selected RNA, 101 bp paired end NovaSeq, target 50 M reads per sample.<br/>
-	Illumina EPIC methylation array, ~850 k sites.<br/>
-	Four metabolomics assay types:  C8-pos, C-18-neg, HILIC-pos (all untargeted), plus Amide-neg with multiple reaction monitoring for ~200 target metabolites.	
-      </p><p>&nbsp;</p>
       <div class="bs-callout bs-callout-info">
         <h3 id="progress">OMICS sample numbers by study</h3>
       </div>
@@ -112,6 +102,9 @@ if(!isset($_SESSION)){
           <h3 class="chartheader">Metabolomics</h3>
           <div id="summary_barchart_metabolomics"> </div>
         </div>
+      </div>
+      <div class="bs-callout bs-callout-info">
+        <h3>RNA-seq progress over time</h3>
       </div>
       <div class="row loading" id="timeline_div">
         <div class="col-lg-12">
@@ -136,12 +129,12 @@ if(!isset($_SESSION)){
         </div>
       </div>
       <div class="bs-callout bs-callout-info">
-        <h3 id="progress">Per sample RNA-seq quality metrics</h3>
+        <h3>Per sample RNA-seq quality metrics</h3>
         <p class="lead">Please log in using Google to download individual level QC results. Email tblackw@umich.edu if you aren't already on the whole genome sequence whitelist.</p>
 <?php if(isset($_SESSION['access_token']) AND isset($_SESSION['omics_user'])) { ?>
 	<a href="?logout" class="btn btn-warning"><span class="glyphicon glyphicon-lock"></span> Logout <?=$user->email; ?></a>
       </div>
-      <div class="loading">
+      <div class="row">
         <div class="col-lg-12">
           <p class="summary">
             <label for="sel_study_table">Filter by study: <select id="sel_study_table"></select></label> &emsp; &emsp;
@@ -153,17 +146,71 @@ if(!isset($_SESSION)){
                 }	
               ?>
             </select></label> &emsp; &emsp; 
-            <a id="download-table-raw" class="btn btn-info btn-sm"><span class="glyphicon glyphicon-list-alt"></span> &nbsp; Export table data</a> &emsp; 
             <a id="download-whole-raw" href="lib/datadump.php" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-download-alt"></span> &nbsp; Download entire QC raw data</a> &emsp; 
-            <a id="sparkler-tool" href="https://sparkler.sph.umich.edu/" class="btn btn-success btn-sm" title="a browser based plotting tool" target="_blank"><span class="glyphicon glyphicon-import"></span> &nbsp; The Sparkler tool </a>
           </p>
           <div id="sample_raw_table" style="height: 600px; overflow-y: hidden;"></div>
         </div>
-      </div>
+       </div>
 <?php } else { ?>
         <a class="login" href="<?=$authUrl; ?>"><img src="images/google-login-button.png"/></a>
       </div>
+      <div class="row"></div>
 <?php } ?>
+      <div class="bs-callout bs-callout-info">
+        <h3>Summary of OMICS samples received</h3>
+      </div>
+      <div class="row">
+        <p class="summary">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th scope="col"></th>
+              <th>RNA-seq</td>
+              <th>Methylation</td>
+              <th>Metabolomics</td>
+              <th>Total by Center</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Broad</th>
+              <td id="broad-rna-seq"> - </td>
+              <td id ="broad-methylation"> - </td>
+              <td id="broad-metabolomics"> - </td>
+              <td id="broad-total"> - </td>
+            </tr>
+            <tr>
+              <th scope="row">NWGC</th>
+              <td id="nwgc-rna-seq"> - </td>
+              <td id="nwgc-methylation"> - </td>
+              <td id="nwgc-metabolomics"> - </td>
+              <td id="nwgc-total"> - </td>
+            </tr>
+            <tr>
+              <th scope="row">USC</th>
+              <td id="usc-rna-seq"> - </td>
+              <td id="usc-methylation"> - </td>
+              <td id="usc-metabolomics"> - </td>
+              <td id="usc-total"> - </td>
+            </tr>
+            <tr>
+              <th scope="row">Total by Type</th>
+              <td id="total-rna-seq"> - </td>
+              <td id="total-methylation"> - </td>
+              <td id="total-metabolomics"> - </td>
+              <td id="total-all"></td>
+            </tr>
+          </tbody>
+        </table>
+      </p>
+      <p> &nbsp; </p>
+      <p class="summary">
+        <strong>Technical:</strong><br/>
+        Stranded, poly-A-selected RNA, 101 bp paired end NovaSeq, target 75 M reads per sample for blood samples, 50 M reads per sample for tissue, cell sorted or globin-depleted blood samples.<br/>
+        Illumina EPIC methylation array, ~850 k sites.<br/>
+        Four metabolomics assay types:  C8-pos, C-18-neg, HILIC-pos (all untargeted), plus Amide-neg with multiple reaction monitoring for ~200 target metabolites.
+      </p>
+      </div>
     </div>
     <footer class="bs-docs-footer"> 
       <div class="container"> 

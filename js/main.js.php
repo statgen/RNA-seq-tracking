@@ -12,7 +12,8 @@ var param = {};
 var metrics_table, rawdata_table;
 
 $(document).ready(function () {
-  //plot three bar charts 
+
+  //plot three bar charts
   drawStudySummary("RNA-seq", "summary_barchart_rnaseq", colors[3]);
   drawStudySummary("Methylation", "summary_barchart_methylation", colors[8]);
   drawStudySummary("Metabolomics", "summary_barchart_metabolomics", colors[7]);
@@ -20,7 +21,10 @@ $(document).ready(function () {
   //plot line/area chart
   drawProgressOverTime();
 
-  //generate metrics table tabulator 
+  //Generate summary table
+  updateSummary();
+
+  //generate metrics table tabulator
   metrics_table = new Tabulator("#qc_metrics_table", {
     placeholder: 'No result found.',
     layout: "fitColumns",
@@ -34,7 +38,7 @@ $(document).ready(function () {
     responsiveLayout: false,
     columns: [
       {rowHandle:true, formatter:"handle", headerSort:false, width:30, minWidth:30},
-      {title: 'QC Measures', field: 'full_attribute', headerFilter: "input"},
+      {title: 'QC Measures', field: 'full_attribute', headerFilter: "input", headerFilterPlaceholder:"Search"},
       {title: 'Box plot', field: 'boxPlot', download: false, headerSort:false, formatter:
         function(cell, formatterParams, onRendered){
           onRendered(function(){
@@ -70,10 +74,10 @@ $(document).ready(function () {
   opts = studyDropdown();
   $("#sel_study_table").append(opts);
   rawDataTable();
-  
+
   $("#sel_study_table, #sel_size_table").on('change', function() {
     var study = $("#sel_study_table").val();
-    var pageSize = $("#sel_size_table").val(); 
+    var pageSize = $("#sel_size_table").val();
     rawDataTable(study, pageSize);
   });
 
@@ -81,24 +85,77 @@ $(document).ready(function () {
   $("#download-table-raw").click(function(){
     rawdata_table.download("csv", "omics-table-raw.tsv",{delimiter:"\t"});
   });
-	
+
 <?php } ?>
 
   //hide pagination footer controls
   $("#qc_metrics_table .tabulator-footer").hide();
- 
+
   //download qc metrics data
   $("#download-table-metrics").click(function(){
     metrics_table.download("csv", "omics-table-metrics.tsv", {delimiter: '\t'});
   });
 
   $("#sel_study_histogram, #sel_study_two").on('change', function() {
-    param['study'] = $("#sel_study_histogram").val(); 
+    param['study'] = $("#sel_study_histogram").val();
     param['compare'] = $("#sel_study_two").val();
     drawHistogram(param);
   });
- 
+
 });
+
+//update the summary table with numbers
+function updateSummary() {
+  var dataset = $.ajax({
+    url : "/omics/lib/summary_by_center_type.php",
+    dataType : "json",
+    async : false,
+  }).responseText;
+  var jsonData = JSON.parse(dataset);
+  var total_broad=0;
+  var total_nwgc=0;
+  var total_usc=0;
+  var total_rna=0;
+  var total_methylation=0;
+  var total_metabolomics=0;
+  var total = 0;
+  for(var i=0; i<jsonData.length; i++) {
+    var elem = "#"+jsonData[i]["center"].toLowerCase()+"-"+jsonData[i]["datatype"].toLowerCase();
+    switch(jsonData[i]["center"]){
+      case "Broad":
+        total_broad+=Number(jsonData[i]["num"]);
+        break;
+      case "NWGC":
+        total_nwgc+=Number(jsonData[i]["num"]);
+        break;
+      case "USC":
+        total_usc+=Number(jsonData[i]["num"]);
+        break;
+      default:
+    }
+    switch(jsonData[i]["datatype"]){
+      case "RNA-seq":
+        total_rna+=Number(jsonData[i]["num"]);
+        break;
+      case "Methylation":
+        total_methylation+=Number(jsonData[i]["num"]);
+        break;
+      case "Metabolomics":
+        total_metabolomics+=Number(jsonData[i]["num"]);
+        break;
+      default:
+    }
+    total=total_rna+total_methylation+total_metabolomics;
+    $(elem).text(Number(jsonData[i]["num"]).toLocaleString('en'));
+    $("#total-rna-seq").text(total_rna.toLocaleString('en'));
+    $("#total-methylation").text(total_methylation.toLocaleString('en'));
+    $("#total-metabolomics").text(total_metabolomics.toLocaleString('en'));
+    $("#broad-total").text(total_broad.toLocaleString('en'));
+    $("#nwgc-total").text(total_nwgc.toLocaleString('en'));
+    $("#usc-total").text(total_usc.toLocaleString('en'));
+    $("#total-all").html("<strong>"+ total.toLocaleString('en')+"</strong>");
+  }
+}
 
 function rawDataTable(study="", pageSize=100) {
   //generate Samples raw table tabulator
@@ -118,21 +175,20 @@ function rawDataTable(study="", pageSize=100) {
     columns: [
       { title: 'Samples', 
         columns: [
-          {title: 'id', field: 'id', headerFilter:"input", headerFilterPlaceholder:"Look up sample"},
+          {title: 'TORID', field: 'torid', headerFilter:"input", headerFilterPlaceholder:"Search"},
           {title: 'Study', field: 'study_id'}
         ],
       },
       { title: 'QC measures',
         columns: [
-          {title: 'Mapping rate', field: 'mapping_rate' },
-          {title: 'Base mismatch', field: 'base_mismatch'},
-          {title: 'Unique rate of mapped', field: 'unique_rate_of_mapped'},
-          {title: 'Exonic rate', field: 'exonic_rate'},
-          {title: 'Intronic rate', field: 'intronic_rate'},
-          {title: 'High quality exonic rate', field: 'high_quality_exonic_rate'},
-          {title: 'rRNA rate', field: 'rrna_rate'},
-          {title: 'rRNA reads', field: 'rrna_reads' },
-          {title: 'Total mapped pairs', field: 'total_mapped_pairs' },
+          {title: 'High Quality Rate', field: 'high_quality_rate' },
+          {title: 'Mapping Rate', field: 'mapping_rate'},
+          {title: 'High Quality Exonic Rate', field: 'high_quality_exonic_rate'},
+          {title: 'High Quality Intronic Rate', field: 'high_quality_intronic_rate'},
+          {title: 'High Quality Intergenic Rate', field: 'high_quality_intergenic_rate'},
+          {title: 'Median 3\' bias', field: 'median_3_bias'},
+          {title: 'Duplicate Rate of Mapped', field: 'dupli_rate_mapped'},
+          {title: 'rRNA Rate', field: 'rrna_rate' },
         ],
       }
     ],
@@ -147,12 +203,6 @@ function drawStudySummary(topic="RNA-seq", div, color) {
     async : false,
   }).responseText;
   var jsonData = JSON.parse(dataset);
-
-  //write summaries in the paragraph below the header
-  var sample = "#"+topic+"_samples";
-  var study = "#"+topic+"_study";  
-  $(sample).html(jsonData["total"]);
-  $(study).html(jsonData["category"].length); 
 
   //set bar chart options
   var options_summary = {
@@ -174,7 +224,7 @@ function drawStudySummary(topic="RNA-seq", div, color) {
     },
     yAxis : {
       title : {
-        text: 'number of samples',
+        text: 'Total OMICS samples received',
       },
     },
     legend: {
@@ -192,7 +242,7 @@ function drawStudySummary(topic="RNA-seq", div, color) {
       enabled: false
     },
     series: [{
-      name: 'completed samples',
+      name: 'OMICS samples',
       data: jsonData['dataset'],
       color: color,
     }]
@@ -201,9 +251,7 @@ function drawStudySummary(topic="RNA-seq", div, color) {
 }
 
 function drawProgressOverTime() {
-  var newSeries = [];
   var jsonData;
-  var category = [];
   var dataset = $.ajax({
     url : "/omics/lib/progress_overtime.php",
     dataType : "json",
@@ -211,27 +259,20 @@ function drawProgressOverTime() {
   }).responseText;
 
   jsonData = JSON.parse(dataset);
-  category = jsonData['category'];
-
-  //calculate sum by date
-  for(var i=0; i<jsonData['data'].length; i++) {
-    if(i==0) {
-      newSeries[i] = parseInt(jsonData['data'][i]);
-    } else {
-      newSeries[i] = newSeries[i-1] + parseInt(jsonData['data'][i]);
-    }
-  };
-  
   //set chart options
   var options_timeline = {
     chart: {
       renderTo: 'timeline_chart',
-      type: 'area',
+      type: 'spline',
+      zoomType: 'x',
     },
     xAxis: {
-      categories: category,
+      type: 'datetime',
+      dateTimeLabelFormats: {
+        month: '%b %Y'
+      },
       title: {
-        text: 'QC Date'
+        text: 'Arrival Date'
       },
     },
     title: {
@@ -244,35 +285,26 @@ function drawProgressOverTime() {
     },
     yAxis : {
       title : {
-        text: 'number of samples',
+        text: 'Total OMICS samples received',
       },
     },
     tooltip: {
-      split: true,
+      formatter: function() {
+        return  'By : ' + Highcharts.dateFormat('%b %e, %Y', new Date(this.x))
+                + '<br.>Total samples received: ' + this.y;
+      }
     },
     legend: {
       enabled: false
     },
     plotOptions: {
-      area: {
-        lineWidth: 1,
+      spline: {
+        lineWidth: 2,
         dataLabels: {
           enabled: true,
         },
-        fillColor: {
-          linearGradient: {
-            x1: 0,
-            y1: 0,
-            x2: 0,
-            y2: 1
-          },
-          stops: [
-            [0, Highcharts.getOptions().colors[2]],
-            [1, Highcharts.color(Highcharts.getOptions().colors[2]).setOpacity(0).get('rgba')]
-          ]
-        },
         marker: {
-          enabled: false,
+          enabled: true,
           symbol: 'circle',
           states: {
             hover: {
@@ -287,7 +319,7 @@ function drawProgressOverTime() {
     },
     series: [{
       name: 'completed samples',
-      data: newSeries,
+      data: jsonData,
       color: colors[6],
     }]
   };
@@ -301,10 +333,10 @@ function studyDropdown(topic="RNA-seq", firstSel="All") {
     async : false,
   }).responseText;
   var jsonData = JSON.parse(dataset);
-  var studies = jsonData["category"];
-  var selection; 
+  var studies = jsonData["studies"];
+  var selection;
   if(firstSel == "All") {
-    selection += '<OPTION value="all">All studies</OPTION>';
+    selection += '<OPTION value="All studies">All studies</OPTION>';
   } else {
     selection += '<OPTION value="">Choose one</OPTION>';
   }
@@ -348,7 +380,7 @@ function drawHistogram(param) {
     }, {
       title: { text: 'Histogram' },
     }],
-    legend:{ enabled:false },
+    legend:{ enabled:true },
     credits:{ enabled:false },
     plotOptions: {
       histogram: {
@@ -381,7 +413,8 @@ function drawHistogram(param) {
       marker: {
         radius: 1.5
       },
-      visible: false, 
+      visible: false,
+      showInLegend: false
     }, {
       name: param["compare"],
       type: 'histogram',
@@ -395,7 +428,8 @@ function drawHistogram(param) {
       type: 'scatter',
       data: jsonColData['compare'],
       id: 's2',
-      visible: false
+      visible: false,
+      showInLegend: false
     }]
    });
   };	

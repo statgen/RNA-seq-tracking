@@ -157,7 +157,7 @@ if(!isset($_SESSION)){
       <div class="row"></div>
 <?php } ?>
       <div class="bs-callout bs-callout-info">
-        <h3>Summary of OMICS samples received</h3>
+        <h3>OMICS sample numbers by production center</h3>
       </div>
       <div class="row">
         <p class="summary">

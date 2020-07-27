@@ -9,25 +9,13 @@ $studies = [];
 $ds=[];
 $topic = strtolower(($_GET["topic"])?$_GET["topic"]:"rna-seq"); 
 
-if($topic=="rna-seq") {
-  $results = Sample::selectRaw("study_id, count(1) as num")
-    ->groupBy("study_id")
-    ->orderBy("study_id")
-    ->get();
-
-  foreach($results as $result) {
-    $study = Study::where("study", $result->study_id)
-      ->first();
-    $studies[] = $result->study_id;
-    $categories[] = ($study)?$study->study." (".$study->center.")":$result->study_id;
-    $ds[] = $result->num;
-  }
-} elseif ($topic == "methylation" || $topic == "metabolomics") {
+if (in_array($topic, ["rna-seq","methylation","metabolomics"])) {
   $results = Study::where("datatype", $topic)
     ->orderBy("study","ASC")
     ->get();
   foreach ($results as $result) {
-    $categories[] = $result->study." (".$result->center.")";
+    $studies[] = $result->study;
+    $categories[] = $result->study." (".$result->center.(($topic==="rna-seq")?"|".$result->pi:"").")";
     $ds[] = $result->samplereceived;
   }
 } else {
@@ -35,7 +23,7 @@ if($topic=="rna-seq") {
   http_response_code(400);
   exit;
 }
-$json = array('category'=>$categories, 'dataset'=>$ds, 'total'=>number_format(array_sum($ds)), 'studies'=>$studies);
+$json = array('category'=>$categories, 'dataset'=>$ds, 'total'=>number_format(array_sum($ds)), 'studies'=>array_unique($studies));
 echo json_encode($json); 
 
 ?>

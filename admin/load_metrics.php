@@ -68,6 +68,7 @@ function get_db_mapping_array($type) {
     $array = [
       "Sample" => "id",
       "Study" => "study_id",
+      "Center" => "center",
       "Dataset" => "dataset_id",
       "TORID" => "torid",
       "Investigator_ID" => "investigator_id",

@@ -12,6 +12,8 @@ if(!$_GET['field'] || !$_GET['label'] || !$_GET['study']) {
 $label = $_GET['label'];
 $field = $_GET["field"];
 $study = $_GET["study"];
+$centers = ["Broad","NWGC"];
+$selectBy = in_array($study, $centers)?"center":"study_id";
 $ds=[];
 $compare=[];
 
@@ -21,16 +23,17 @@ if($study ==="All studies") {
 } else {
   $ds = QcMetrics::join("samples","samples.id","=","sample_id")
     ->whereNotNull($field)
-    ->where("study_id",$study)
+    ->where($selectBy, $study)
     ->pluck($field)
     ->toArray();
 }
 
 //query dataset two if set
 if(isset($_GET['compare'])) {
+  $useField = in_array($_GET['compare'], $centers)?"center":"study_id";
   $compare = QcMetrics::join("samples","samples.id","=","sample_id")
     ->whereNotNull($field)
-    ->where("study_id", $_GET['compare'])
+    ->where($useField, $_GET['compare'])
     ->pluck($field)
     ->toArray();
 }

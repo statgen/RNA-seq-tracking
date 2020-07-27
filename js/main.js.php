@@ -38,7 +38,9 @@ $(document).ready(function () {
     responsiveLayout: false,
     columns: [
       {rowHandle:true, formatter:"handle", headerSort:false, width:30, minWidth:30},
-      {title: 'QC Measures', field: 'full_attribute', headerFilter: "input", headerFilterPlaceholder:"Search"},
+      {title: 'QC Measures', field: 'full_attribute', headerFilter: "input", headerFilterPlaceholder:"Search", width: "35%", tooltip:
+        function (row) { return row.getData().full_attribute; }
+      },
       {title: 'Box plot', field: 'boxPlot', download: false, headerSort:false, formatter:
         function(cell, formatterParams, onRendered){
           onRendered(function(){
@@ -56,9 +58,9 @@ $(document).ready(function () {
     ],
     rowClick: function(e, row){
       if($("#study_dropdown").hasClass("hidden")) {
-        var opts = studyDropdown();
+        var opts = studyDropdown("RNA-seq","All studies",true);
         $("#sel_study_histogram").append(opts);
-        opts = studyDropdown("RNA-seq", "");
+        opts = studyDropdown("RNA-seq", "", true);
         $("#sel_study_two").append(opts);
         $("#study_dropdown").removeClass("hidden");
       }
@@ -326,7 +328,7 @@ function drawProgressOverTime() {
   var linechart = new Highcharts.chart(options_timeline);
 }
 
-function studyDropdown(topic="RNA-seq", firstSel="All") {
+function studyDropdown(topic="RNA-seq", firstSel="All studies", addCenter=false) {
   var dataset = $.ajax({
     url : "/omics/lib/sample_summary.php?topic="+topic,
     dataType : "json",
@@ -335,7 +337,7 @@ function studyDropdown(topic="RNA-seq", firstSel="All") {
   var jsonData = JSON.parse(dataset);
   var studies = jsonData["studies"];
   var selection;
-  if(firstSel == "All") {
+  if(firstSel == "All studies") {
     selection += '<OPTION value="All studies">All studies</OPTION>';
   } else {
     selection += '<OPTION value="">Choose one</OPTION>';
@@ -343,6 +345,10 @@ function studyDropdown(topic="RNA-seq", firstSel="All") {
   jQuery.each(studies, function(){
     selection += '<OPTION value="'+this+'">'+this+'</OPTION>';
   });
+  if(addCenter) {
+    selection += '<OPTION value="Broad">Broad(center)</OPTION>';
+    selection += '<OPTION value="NWGC">NWGC(center)</OPTION>';
+  }
   return selection;
 }
 

@@ -39,9 +39,9 @@ $(document).ready(function () {
     columns: [
       {rowHandle:true, formatter:"handle", headerSort:false, width:30, minWidth:30},
       {title: 'QC Measures', field: 'full_attribute', headerFilter: "input", headerFilterPlaceholder:"Search", width: "35%", tooltip:
-        function (row) { return row.getData().full_attribute; }
+        function (row) { return row.getData().description; }
       },
-      {title: 'Box plot', field: 'boxPlot', download: false, headerSort:false, formatter:
+      {title: 'Box plot', field: 'boxPlot', visible:false, download: false, headerSort:false, formatter:
         function(cell, formatterParams, onRendered){
           onRendered(function(){
             $(cell.getElement()).sparkline(cell.getValue(), {width:"100%", raw:true, type:"box"});
@@ -50,11 +50,11 @@ $(document).ready(function () {
       },
       {title: 'Mean', field: 'mean' },
       {title: 'SD', field: 'sd'},
-      {title: 'Min', field: 'min', visible:false, download: true},
+      {title: 'Min', field: 'min', download: true},
       {title: '25%', field: 'pct25', visible:false, download: true },
       {title: 'Median', field: 'median'},
       {title: '75%', field: 'pct75', visible:false, download: true },
-      {title: 'Max', field: 'max', visible:false, download: true },
+      {title: 'Max', field: 'max', download: true },
     ],
     rowClick: function(e, row){
       if($("#study_dropdown").hasClass("hidden")) {

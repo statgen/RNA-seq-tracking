@@ -72,9 +72,9 @@ function get_db_mapping_array($type) {
       "Dataset" => "dataset_id",
       "TORID" => "torid",
       "Investigator_ID" => "investigator_id",
-      "Family ID" => "family_id",
-      "Good Faith Approved" => "good_faith_approved",
-      "Tissue Type" => "tissue_type",
+      "Family_ID" => "family_id",
+      "Good_Faith_Approved" => "good_faith_approved",
+      "Tissue_Type" => "tissue_type",
       "arrival_date" => "arrival_date"
     ];
   } elseif ($type==="qc_metrics") {
@@ -110,30 +110,36 @@ function process_data_in_tsv($file, $table, $qid=null) {
   if (($handle = fopen($file, "r")) !== FALSE) {
     while (($row = fgetcsv($handle, 2048, "\t")) !== FALSE) {
       if (empty($fields)) {
-        $fields = $row;
+	$fields = $row;
         //remove the last column if empty, this happens in some files
         if(empty(end($fields))) {
           array_pop($fields);
           $empty_last_column = true;
-        }
-        for ($j=0; $j<count($fields); $j++) {
-          $fields[$j] = trim($fields[$j]);
-          if ($fields[$j] && array_key_exists($fields[$j], $fields_db_mapping)) {
-            $fields[$j] = $fields_db_mapping[$fields[$j]];
-          } else {
-            echo "Error: empty header column found in tsv file, process terminated!\n";
-            exit;
+	}
+	for ($j=0; $j<count($fields); $j++) {
+	  $fields[$j] = trim($fields[$j]);
+          # Remove unexpected leading characters
+	  if($j===0){
+            $fields[$j] = preg_replace('/[^A-Za-z0-9 \,]/', '', $fields[$j]);  
           }
-        }
-        $columns = implode("`,`", $fields);
+          if ($fields[$j] && array_key_exists($fields[$j], $fields_db_mapping)) {
+	    $fields[$j] = $fields_db_mapping[$fields[$j]];
+	  } else {
+	    echo "Error: empty header column found in tsv file, process terminated!\n";
+	    echo "check the header ".$fields[$j]."\n";
+	    echo "HINT: may need to convert colomns to rows. https://onlinetsvtools.com/convert-tsv-columns-to-rows \n";
+	    exit;
+          }
+	}
+	$columns = implode("`,`", $fields);
         $file_queue_id = ($table=="qc_metrics")? ",`file_queue_id`":"";
         $sql = <<<SQL
 INSERT INTO `rna_seq`.`{$table}` (`{$columns}`{$file_queue_id}) VALUES \n
 SQL;
         continue;
       }
-      //remove the last element if empty
-      if($empty_last_column) {
+      //remove the last element if empty and unmatch header
+      if($empty_last_column && count($row)>count($fields)) {
         array_pop($row);
       }
       foreach ($row as $k=>$value) {

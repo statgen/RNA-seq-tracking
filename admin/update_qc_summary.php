@@ -2,6 +2,12 @@
 
 <?php
 require_once("../lib/cli.inc.php");
+
+//validate user permission
+if(!checkAdminPermission()) {
+  exit;
+}
+
 $field = "";
 
 print "Starting the update ... \n";

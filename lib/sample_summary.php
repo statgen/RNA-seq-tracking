@@ -9,7 +9,7 @@ $studies = [];
 $ds=[];
 $topic = strtolower(($_GET["topic"])?$_GET["topic"]:"rna-seq"); 
 
-if (in_array($topic, ["rna-seq","methylation","metabolomics"])) {
+if (in_array($topic, ["rna-seq","methylation","metabolomics","proteomics"])) {
   $results = Study::where("datatype", $topic)
     ->orderBy("study","ASC")
     ->get();

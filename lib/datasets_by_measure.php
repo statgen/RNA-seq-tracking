@@ -9,10 +9,11 @@ if(!$_GET['field'] || !$_GET['label'] || !$_GET['study']) {
   exit;
 }
 
-$label = $_GET['label'];
+$label = strip_tags($_GET['label']);
+$label = filter_var($label, FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_HIGH);
 $field = $_GET["field"];
 $study = $_GET["study"];
-$centers = ["Broad","NWGC"];
+$centers = ["Broad","NWGC","NYGC"];
 $selectBy = in_array($study, $centers)?"center":"study_id";
 $ds=[];
 $compare=[];

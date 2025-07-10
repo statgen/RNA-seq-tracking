@@ -4,8 +4,16 @@ if(!isset($_SESSION)){
 }
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en-US">
   <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-848D0QR2QW"></script>
+    <script>
+  	window.dataLayer = window.dataLayer || [];
+  	function gtag(){dataLayer.push(arguments);}
+  	gtag('js', new Date());
+  	gtag('config', 'G-848D0QR2QW');
+    </script>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,27 +22,28 @@ if(!isset($_SESSION)){
     <meta name="author" content="">
 
     <title>TOPMed OMICS Progress Report</title>
-    
-    <!-- Bootstrap CSS -->
+
+     <!-- Bootstrap CSS -->
     <link href="../report/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="data:text/css;charset=utf-8," data-href="../report/dist/css/bootstrap-theme.min.css" rel="stylesheet" id="bs-theme-stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tabulator/4.4.3/css/tabulator.min.css" rel="stylesheet">
     <link href="../report/css/docs.css" rel="stylesheet">
     <link href="../report/css/template.css" rel="stylesheet">
     <!-- jquery ui js and css for autocomplete -->
-    <link href="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.2/jquery-ui.css" rel="stylesheet"/>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+    <link href="//code.jquery.com/ui/1.14.1/themes/base/jquery-ui.css" rel="stylesheet"/>
+    <script src="//code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="//code.jquery.com/ui/1.14.1/jquery-ui.js" integrity="sha256-9zljDKpE/mQxmaR4V2cGVaQ7arF3CcXxarvgr7Sj8Uc=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-sparklines/2.1.2/jquery.sparkline.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.4/fetch.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
     <script type="text/javascript" src="https://code.highcharts.com/stock/highstock.js"></script>
     <script type="text/javascript" src="https://code.highcharts.com/highcharts-more.js"></script>
     <script src="https://code.highcharts.com/modules/histogram-bellcurve.js"></script>
     <script src="https://code.highcharts.com/modules/accessibility.js"></script>
-    <script type="text/javascript" src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script type="text/javascript" src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+    <!--script type="text/javascript" src="https://code.highcharts.com/modules/exporting.js"></script-->
+    <!--script type="text/javascript" src="https://code.highcharts.com/modules/offline-exporting.js"></script-->
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/4.4.3/js/tabulator.min.js"></script>
     <script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
   </head>
@@ -90,18 +99,22 @@ if(!isset($_SESSION)){
         <h3 id="progress">OMICS sample numbers by study</h3>
       </div>
       <div class="row loading">
-        <div class="col-md-4 col-sm-12">
+        <div class="col-md-3 col-sm-12">
           <h3 class="chartheader">RNA-seq</h3>
           <div id="summary_barchart_rnaseq"> </div>
         </div>
-        <div class="col-md-4 col-sm-12">
+        <div class="col-md-3 col-sm-12">
           <h3 class="chartheader">Methylation</h3>
           <div id="summary_barchart_methylation"> </div>
         </div>
-        <div class="col-md-4 col-sm-12">
+        <div class="col-md-3 col-sm-12">
           <h3 class="chartheader">Metabolomics</h3>
           <div id="summary_barchart_metabolomics"> </div>
-        </div>
+	</div>
+        <div class="col-md-3 col-sm-12">
+	  <h3 class="chartheader">Proteomics</h3>
+          <div id="summary_barchart_proteomics"> </div>   
+        </div> 
       </div>
       <div class="bs-callout bs-callout-info">
         <h3>RNA-seq progress over time</h3>
@@ -116,7 +129,7 @@ if(!isset($_SESSION)){
           <h3 class="chartheader">RNA-seq QC metrics</h3> 
           <p>This table shows aggregates across studies for many metrics of RNA-seq quality. &emsp; &emsp; <button id="download-table-metrics" class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-list-alt"></span> &nbsp; Export table</button></p> 
           <div>
-            <div id="qc_metrics_table" style="height: 420px; overflow-y: hidden; overflow-x: hidden"> </div>
+            <div id="qc_metrics_table" style="height: 420px; overflow-y: hidden; overflow-x: hidden" aria-busy="true" role="table"> </div>
           </div> 
         </div>
         <div class="col-md-5 col-sm-12">
@@ -130,7 +143,7 @@ if(!isset($_SESSION)){
       </div>
       <div class="bs-callout bs-callout-info">
         <h3>Per sample RNA-seq quality metrics</h3>
-        <p class="lead">Please log in using Google to download individual level QC results. Email tblackw@umich.edu if you aren't already on the whole genome sequence whitelist.</p>
+        <p class="lead">Please log in using Google to download individual level QC results. Email lwkevin@umich.edu if you aren't already on the whole genome sequence whitelist.</p>
 <?php if(isset($_SESSION['access_token']) AND isset($_SESSION['omics_user'])) { ?>
 	<a href="?logout" class="btn btn-warning"><span class="glyphicon glyphicon-lock"></span> Logout <?=$user->email; ?></a>
       </div>
@@ -148,11 +161,11 @@ if(!isset($_SESSION)){
             </select></label> &emsp; &emsp; 
             <a id="download-whole-raw" href="lib/datadump.php" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-download-alt"></span> &nbsp; Download entire QC raw data</a> &emsp; 
           </p>
-          <div id="sample_raw_table" style="height: 600px; overflow-y: hidden;"></div>
+          <div id="sample_raw_table" style="height: 600px; overflow-y: hidden;" aria-busy="true"></div>
         </div>
        </div>
 <?php } else { ?>
-        <a class="login" href="<?=$authUrl; ?>"><img src="images/google-login-button.png"/></a>
+        <a class="login" href="<?=$authUrl; ?>"><img src="images/google-login-button.png" alt="Login with Google" /></a>
       </div>
       <div class="row"></div>
 <?php } ?>
@@ -167,7 +180,8 @@ if(!isset($_SESSION)){
               <th scope="col"></th>
               <th>RNA-seq</td>
               <th>Methylation</td>
-              <th>Metabolomics</td>
+	      <th>Metabolomics</td>
+              <th>Proteomics</th>
               <th>Total by Center</th>
             </tr>
           </thead>
@@ -176,28 +190,48 @@ if(!isset($_SESSION)){
               <th scope="row">Broad</th>
               <td id="broad-rna-seq"> - </td>
               <td id ="broad-methylation"> - </td>
-              <td id="broad-metabolomics"> - </td>
+	      <td id="broad-metabolomics"> - </td>
+              <td id="broad-proteomics"> - </td>
               <td id="broad-total"> - </td>
             </tr>
             <tr>
               <th scope="row">NWGC</th>
               <td id="nwgc-rna-seq"> - </td>
               <td id="nwgc-methylation"> - </td>
-              <td id="nwgc-metabolomics"> - </td>
+	      <td id="nwgc-metabolomics"> - </td>
+              <td id="nwgc-proteomics"> - </td>
               <td id="nwgc-total"> - </td>
-            </tr>
+	    </tr>
+	    <tr>
+	      <th scope="row">NYGC</th>
+              <td id="nygc-rna-seq"> - </td>
+              <td id="nygc-methylation"> - </td>
+	      <td id="nygc-metabolomics"> - </td>
+              <td id="nygc-proteomics"> - </td>
+              <td id="nygc-total"> - </td>	
+ 	    </tr>
             <tr>
               <th scope="row">USC</th>
               <td id="usc-rna-seq"> - </td>
               <td id="usc-methylation"> - </td>
-              <td id="usc-metabolomics"> - </td>
+	      <td id="usc-metabolomics"> - </td>
+              <td id="usc-proteomics"> - </td>
               <td id="usc-total"> - </td>
+	    </tr>
+            <tr>
+              <th scope="row">Baylor</th>
+              <td id="baylor-rna-seq"> - </td>
+              <td id="baylor-methylation"> - </td>
+	      <td id="baylor-metabolomics"> - </td>
+              <td id="baylor-proteomics"> - </td>
+              <td id="baylor-total"> - </td>
             </tr>
             <tr>
               <th scope="row">Total by Type</th>
               <td id="total-rna-seq"> - </td>
               <td id="total-methylation"> - </td>
-              <td id="total-metabolomics"> - </td>
+	      <td id="total-metabolomics"> - </td>
+              <td id="total-proteomics"> - </td>
               <td id="total-all"></td>
             </tr>
           </tbody>

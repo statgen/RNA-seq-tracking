@@ -13,9 +13,9 @@
     <link href="../report/css/docs.css" rel="stylesheet">
     <link href="../report/css/template.css" rel="stylesheet">
     <!-- jquery ui js and css for autocomplete -->
-    <link href="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.2/jquery-ui.css" rel="stylesheet"/>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js" integrity="sha256-9zljDKpE/mQxmaR4V2cGVaQ7arF3CcXxarvgr7Sj8Uc=" crossorigin="anonymous"></script>
+    <link href="//code.jquery.com/ui/1.14.1/themes/base/jquery-ui.css" rel="stylesheet"/>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
   </head>
   <body>
@@ -68,7 +68,7 @@
       <div class="bs-callout bs-callout-info">
         <h3 id="contact">Contact</h3>
       </div>
-      <p>For general questions regarding the TOPMed WGS project, please contact Tom Blackwell (tblackw@umich.edu). For questions regarding the website and its content, please contact Kevin (Wei) Li (kevinwli@umich.edu).
+      <p>For general questions regarding the TOPMed WGS project, please contact the IRC (topmed.informatics@umich.edu). For questions regarding the website and its content, please contact Kevin Li (kevinwli@umich.edu).
       </p>
       <p>&nbsp;</p>
       <div class="bs-callout bs-callout-info">
